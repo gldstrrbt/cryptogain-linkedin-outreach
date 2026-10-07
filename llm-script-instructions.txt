@@ -1,0 +1,420 @@
+General Rule:
+- When detecting/monitoring/observing for text or class names make sure to always set the text/class names to lowercase 
+- When logging to the CSV log file, please DO NOT modify the cases of the text being written to the CSV file.
+- When logging profile URLs/HREFs, only log the part before the "?"  
+
+Part I:
+0. open csv log file to read from if it exists, otherwise create one to log to
+1. use nodriver python library to open linkedin
+2. sign in
+3. go to each link in given array. For example:
+	["https://www.linkedin.com/company/coindesk/people/"]
+4. wait for page to load then scroll to the bottom and/or find and click "show more results" button at the bottom of the page. Add a delay in between loads or add a monitor/observer to wait until the "show more results" button appears again, and a timeout for the montior/observer in case the button does not appear again. 
+5. once "show more results" button can no longer be detected, scan each <li> for class name "org-people-profile-card__profile-card-spacing"
+6. log each of these <li> elements' content for <button> with a class name "artdeco-button"
+7. if a <button> with a class name "artdeco-button" is detected, then check to see if the rest of the contents in the <li> contain any of the words in the following array:
+	["reporter", "freelance", "writer", "writing", "journalist", "anchor", "marketing", "marketer", "market analyst", "media relations", "public relations", "outreach", "editor", "community", "partnerships"]
+8. if any of the words from that array are detected in the text content (not the HTML attributes of the elements within the <li>), then if the user's info hasn't been logged to the csv log file (use their url as the unique id to check against), log the href/link to their profile one time along with their position title, name, and company, along with False for "sent_connection" column and False for "connected" column for their csv row's entry to the csv log
+9. close csv log
+
+Example <li> element for the people listed on a company's page:
+<li class="grid grid__col--lg-8 block org-people-profile-card__profile-card-spacing">
+                <div>
+  
+                  
+    <section class="artdeco-card full-width hxaDzTfMHLFiVjwdaSNyVfJtuAktarbioZw">
+<!---->
+  
+      <img width="210" src="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" ariarole="presentation" loading="lazy" height="210" alt="" id="ember2898" class="evi-image lazy-image ghost-default ember-view org-people-profile-card__cover-photo org-people-profile-card__cover-photo--people">
+
+      <div class="org-people-profile-card__profile-info">
+        <div id="ember2899" class="artdeco-entity-lockup artdeco-entity-lockup--stacked-center artdeco-entity-lockup--size-7 ember-view">
+          <div id="ember2900" class="artdeco-entity-lockup__image artdeco-entity-lockup__image--type-circle ember-view" type="circle">
+
+              <a class="ZiiaRflOBoVtdaDvzLtblOwdTlUmDcTmRyM " id="org-people-profile-card__profile-image-105" href="https://www.linkedin.com/in/jamesbutler28?miniProfileUrn=urn%3Ali%3Afs_miniProfile%3AACoAAAS0dOcBYUlt0FJjqaTFbf3izcrydIdnyJU" data-test-app-aware-link="">
+                <img width="104" src="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" loading="lazy" height="104" alt="James B." id="ember2901" class="evi-image lazy-image ghost-person ember-view">
+              </a>
+
+          
+</div>
+          <div id="ember2902" class="artdeco-entity-lockup__content ember-view">
+            <div id="ember2903" class="artdeco-entity-lockup__title ember-view">
+                <a class="ZiiaRflOBoVtdaDvzLtblOwdTlUmDcTmRyM  link-without-visited-state" aria-label="View James B.’s profile" href="https://www.linkedin.com/in/jamesbutler28?miniProfileUrn=urn%3Ali%3Afs_miniProfile%3AACoAAAS0dOcBYUlt0FJjqaTFbf3izcrydIdnyJU" data-test-app-aware-link="">
+                    <div id="ember2905" class="ember-view lt-line-clamp lt-line-clamp--single-line vYCpCGrhLcjqhoWBqHnHFxWHrbuRTsWKV
+                      t-black" style="">
+      James B.
+
+<!---->  </div>
+
+                </a>
+            
+</div>
+              <div id="ember2906" class="artdeco-entity-lockup__badge ember-view">    <span class="a11y-text">3rd+ degree connection</span>
+  <span class="artdeco-entity-lockup__degree" aria-hidden="true">
+    ·&nbsp;3rd
+  </span>
+<!----><!----></div>
+            <div id="ember2907" class="artdeco-entity-lockup__subtitle ember-view">
+                <div class="t-14 t-black--light t-normal">
+                    <div id="ember2909" class="ember-view lt-line-clamp lt-line-clamp--multi-line" style="-webkit-line-clamp: 2">
+      Director, Engineering
+
+<!---->  </div>
+
+                </div>
+            </div>
+            <div id="ember2910" class="artdeco-entity-lockup__caption ember-view"></div>
+          </div>
+        
+</div>
+          <span class="text-align-center">
+                <span id="ember2912" class="ember-view lt-line-clamp lt-line-clamp--multi-line t-12 t-black--light mt2" style="-webkit-line-clamp: 3">
+      488 followers
+
+<!---->  </span>
+
+          </span>
+      </div>
+
+        <footer class="ph3 pb3">
+            <button aria-label="Follow James B." id="ember2947" class="artdeco-button artdeco-button--2 artdeco-button--secondary ember-view full-width" type="button"><!---->
+<span class="artdeco-button__text">
+    Follow
+</span></button>
+                  </footer>
+    
+</section>
+  
+                
+</div>
+
+              </li>
+
+Part II:
+0. open csv log to read from if it exists.
+1. use nodriver python library to log into linkedin if it's not already logged in
+2. go to each URL/HREF in each row other than the CSV header (if there is a header) if the row's column for "sent_connection" hasn't been set to True.
+3. wait for the URL/HREF's page to load, then check the HTML contents of the page to detect whether or not there's a <button> element containing the text "pending", "connect", or "follow".
+4. if "pending" is detected, write to that row's "sent_connection" column True if it hasn't been in the csv log.
+	- if "connect" is detected, click it and wait for it to change to "pending" and set a timeout/delay as a fallback to ensure it's been properly sent/requested.
+	- if "follow" is detected, detect whether or not a sibling of the button is an element with the class name "artdeco-dropdown" and if a child/grandchild/etc element within it contains a button with the text (not attributes) "more".
+		- if "more" is detected then click that button, there should be a div containing <li> elements. Search each <li> to detect whether or not "connect" (not "remove connection") is detected in the text content (not attribute).
+			- if "connect" (not "remove connection") is detected, then click that <li> that contains the text "connect" and wait for a button to appear in the page that contains the text "send without a note", then click the button containing the text "send without a note" and wait a moment for the button to disappear but add in a fallback timeout to ensure enough time has passed to move on just in case the button does not disappear. After please log True to the row's "sent_connection" column in the CSV log file. 
+5. separately from detecting "pending", "connect", and "follow", please click the "more" dropdown button to detect if any of the <li> elements in the dropdown <div> contain the text "remove connection".
+	- if "remove connection" is detected set the row's column "connected" to True in the csv log file
+6. please add realistic delays in between actions to avoid getting rate limited or trigger bot detection.
+
+
+Example of targeted buttons and dropdown found on people's profile pages mentioned in Part II:
+<div class="dtFnJhhBNuqFkzjHqKbCzJTcKyVjchcPwXEUIe
+    
+    ">
+          
+      
+        
+    
+          
+        
+    <button aria-label="Pending, click to withdraw invitation sent to Peter Nicholls" id="ember79" class="artdeco-button artdeco-button--2 artdeco-button--secondary ember-view fxKRjmCEPRhnoxKEINJwQqsrlreEhtbvAqaEqw" type="button">        <svg role="none" aria-hidden="true" class="artdeco-button__icon " xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 16 16" data-supported-dps="16x16" data-test-icon="clock-small">
+<!---->    
+    <use href="#clock-small" width="16" height="16"></use>
+</svg>
+
+
+<span class="artdeco-button__text">
+    Pending
+</span></button>
+  
+      
+        
+
+<!---->  
+
+<!---->
+<!---->
+<!---->  
+  
+
+
+<!---->
+<!---->
+<!---->
+<!---->
+<!---->
+<!---->
+<!---->
+<!---->
+<!---->
+<!---->
+<!---->
+<!---->
+
+
+
+    <!---->
+<!---->
+<!---->
+<!---->
+<!---->
+<!---->
+<!---->
+<!---->
+<!---->
+<!---->
+      <button aria-label="Save Peter Nicholls as a lead in Sales Navigator" id="ember80" class="artdeco-button artdeco-button--2 artdeco-button--secondary ember-view fxKRjmCEPRhnoxKEINJwQqsrlreEhtbvAqaEqw"><!---->
+<span class="artdeco-button__text">
+    Save in Sales Navigator
+</span></button>
+
+
+<!---->
+<!---->
+
+
+
+<!---->
+<!---->
+<!---->
+<!---->
+    <div id="ember82" class="artdeco-dropdown artdeco-dropdown--placement-bottom artdeco-dropdown--justification-left ember-view">
+  <button aria-expanded="false" aria-label="More actions" id="ember81-profile-overflow-action" class="artdeco-dropdown__trigger artdeco-dropdown__trigger--placement-bottom ember-view fxKRjmCEPRhnoxKEINJwQqsrlreEhtbvAqaEqw
+      artdeco-button artdeco-button--secondary artdeco-button--muted
+      artdeco-button--2
+      
+      " type="button" tabindex="0">
+      <span>More</span>
+      
+<!----></button>
+  <div tabindex="-1" aria-hidden="true" id="ember84" class="UNsPliFsOefLIHQfxWKRFrQjIuypzaxLANrIM artdeco-dropdown__content artdeco-dropdown--is-dropdown-element artdeco-dropdown__content--justification-left artdeco-dropdown__content--placement-bottom ember-view"><div class="artdeco-dropdown__content-inner">
+  
+    <ul>
+        <li>
+          <!---->
+<!---->
+<!---->
+<!---->
+<!---->
+<!---->
+<!---->
+<!---->
+      <div aria-label="View Peter Nicholls’ profile in Sales Navigator" role="button" id="ember85" class="artdeco-dropdown__item artdeco-dropdown__item--is-dropdown ember-view full-width display-flex align-items-center" tabindex="0"><!---->
+      <svg role="none" aria-hidden="true" class="mr3 flex-grow-0" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" data-supported-dps="24x24" data-test-icon="sales-navigator-small">
+<!---->    
+    <use href="#sales-navigator-small" width="24" height="24"></use>
+</svg>
+
+    <span class="display-flex t-normal flex-1" aria-hidden="true">View in Sales Navigator</span>
+  </div>
+
+
+
+<!---->
+<!---->
+<!---->
+<!---->
+
+
+        </li>
+        <li>
+          <!---->
+<!---->
+<!---->
+<!---->
+<!---->
+<!---->
+<!---->
+<!---->
+<!---->
+<!---->
+<!---->
+      <div aria-label="Send Peter Nicholls’ profile via message" role="button" id="ember86" class="artdeco-dropdown__item artdeco-dropdown__item--is-dropdown ember-view full-width display-flex align-items-center" tabindex="0"><!---->
+    <svg role="none" aria-hidden="true" class="mr3 flex-grow-0" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" data-supported-dps="24x24" data-test-icon="share-linkedin-medium" data-rtl="true">
+<!---->    
+    <use href="#share-linkedin-medium" width="24" height="24"></use>
+</svg>
+
+    <span class="display-flex t-normal flex-1" aria-hidden="true">
+      Send profile in a message
+    </span>
+  </div>
+
+
+<!---->
+
+
+        </li>
+        <li>
+          <!---->
+<!---->
+<!---->
+<!---->
+<!---->
+<!---->
+      <div aria-label="Save to PDF" role="button" id="ember87" class="artdeco-dropdown__item artdeco-dropdown__item--is-dropdown ember-view full-width display-flex align-items-center" tabindex="0"><!---->
+      <svg role="none" aria-hidden="true" class="mr3 flex-grow-0" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" data-supported-dps="24x24" data-test-icon="download-medium">
+<!---->    
+    <use href="#download-medium" width="24" height="24"></use>
+</svg>
+
+    <span class="display-flex t-normal flex-1" aria-hidden="true">Save to PDF</span>
+  </div>
+
+
+
+<!---->
+<!---->
+<!---->
+<!---->
+<!---->
+<!---->
+
+
+        </li>
+        <li>
+          <!---->
+<!---->
+<!---->
+<!---->
+        
+
+    <div class="entry-point display-flex align-items-center">
+      
+    <div></div>
+  
+
+          
+      <div aria-label="Message Peter" role="button" id="ember88" class="artdeco-dropdown__item artdeco-dropdown__item--is-dropdown ember-view full-width display-flex align-items-center" tabindex="0"><!---->
+          <svg role="none" aria-hidden="true" class="mr3 flex-grow-0" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" data-supported-dps="24x24" data-test-icon="send-privately-medium" data-rtl="true">
+<!---->    
+    <use href="#send-privately-medium" width="24" height="24"></use>
+</svg>
+
+        <span class="display-flex t-normal flex-1" aria-hidden="true">Message Peter</span>
+
+      </div>
+    
+    </div>
+  
+
+
+
+<!---->
+<!---->
+<!---->
+<!---->
+<!---->
+<!---->
+<!---->
+<!---->
+
+
+        </li>
+        <li>
+          <!---->
+    
+    
+    <div aria-label="Follow Peter Nicholls" role="button" id="ember89" class="artdeco-dropdown__item artdeco-dropdown__item--is-dropdown ember-view full-width display-flex align-items-center" tabindex="0"><!---->
+        <svg role="none" aria-hidden="true" class="mr3 flex-grow-0" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" data-supported-dps="24x24" data-test-icon="add-medium">
+<!---->    
+    <use href="#add-medium" width="24" height="24"></use>
+</svg>
+
+      <span class="display-flex t-normal flex-1" aria-hidden="true">Follow</span>
+    </div>
+
+
+
+<!---->
+<!---->  
+
+<!---->
+<!---->
+<!---->
+<!---->
+<!---->
+<!---->
+<!---->
+<!---->
+<!---->
+<!---->
+<!---->
+
+
+        </li>
+        <li>
+          <!---->
+<!---->
+<!---->
+<!---->
+<!---->
+<!---->
+<!---->
+<!---->
+<!---->
+<!---->
+<!---->
+<!---->
+<!---->
+
+
+        </li>
+        <li>
+          <!---->
+<!---->
+<!---->
+<!---->
+<!---->
+<!---->
+<!---->
+<!---->
+<!---->
+      <div aria-label="Report or block Peter Nicholls’ profile" role="button" id="ember90" class="artdeco-dropdown__item artdeco-dropdown__item--is-dropdown ember-view full-width display-flex align-items-center" tabindex="0"><!---->
+      <svg role="none" aria-hidden="true" class="mr3 flex-grow-0" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" data-supported-dps="24x24" data-test-icon="report-medium">
+<!---->    
+    <use href="#report-medium" width="24" height="24"></use>
+</svg>
+
+    <span class="display-flex t-normal flex-1" aria-hidden="true">Report / Block</span>
+  </div>
+
+
+<!---->
+
+<!---->
+<!---->
+<!---->
+
+
+        </li>
+
+        <li>
+          
+    <div role="button" id="ember91" class="display-flex align-items-center full-width  artdeco-dropdown__item artdeco-dropdown__item--is-dropdown ember-view" tabindex="0"><!---->
+        <svg role="none" aria-hidden="true" class="mr3 flex-grow-0" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" data-supported-dps="24x24" data-test-icon="signal-notice-medium">
+<!---->    
+    <use href="#signal-notice-medium" width="24" height="24"></use>
+</svg>
+
+      <span class="display-flex t-normal flex-1" aria-hidden="true">About this profile</span>
+      <span class="a11y-text" aria-live="off">About this profile</span>
+    </div>
+
+        </li>
+    </ul>
+  
+</div>
+</div>
+</div>
+</div>
+
+
+
+
+
+
+
+
+
+URL for people search - 2nd degree connections - working at certain crypto news outlets:
+https://www.linkedin.com/search/results/people/?currentCompany=%5B%2210092533%22%2C%2210344515%22%2C%2211818546%22%2C%2214396552%22%2C%2214566506%22%2C%2218256239%22%2C%2219135858%22%2C%2226579525%22%2C%2227024877%22%2C%222857634%22%2C%223104779%22%2C%223733943%22%2C%2237390664%22%2C%226554949%22%5D&network=%5B%22S%22%5D&origin=FACETED_SEARCH&page=6&sid=!MJ 
+
